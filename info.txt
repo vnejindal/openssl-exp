@@ -148,3 +148,38 @@ c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.exe pkcs12 -in key.pfx -out key.pem
 .p7b file -> p7b file -> b64_der file -> combine them to single p7b file using openssl command 
 c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.exe crl2pkcs7 -nocrl -outform DER -certfile root_b64.cer -certfile inter_b64.cer -certfile leaf_b64.cer -out vne.p7b
 
+==========================================================================
+
+Useful Info: 
+
+
+https://docs.huihoo.com/doxygen/openssl/1.0.1c/x509__lu_8c.html
+https://cpp.hotexamples.com/examples/-/-/X509_STORE_get_by_subject/cpp-x509_store_get_by_subject-function-examples.html
+https://www.openssl.org/docs/man1.1.1/man3/X509_load_cert_crl_file.html
+https://stackoverflow.com/questions/26218495/openssl-c-api-crl-check
+https://jamielinux.com/docs/openssl-certificate-authority/certificate-revocation-lists.html
+
+
+
+
+
+int verify_callback(int preverify, X509_STORE_CTX* x509_ctx)
+{
+    STACK_OF(X509) * certs = X509_STORE_CTX_get1_chain(x509_ctx);
+    X509 * cert;
+    for (int i = 0, count = sk_X509_num(certs); i < count; i++) {
+        if (i < CERTIFICATE_CHAIN_MAXIMUM) {
+            cert = sk_X509_value(certs, i);
+            if (cert != NULL) {
+                certificateChain[i] = cert;
+                numberOfCerts ++;
+            }
+        } else {
+            printf("Certificate chain maximum exceeded.");
+        }
+    }
+
+    return preverify;
+}
+
+
