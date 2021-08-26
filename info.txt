@@ -119,24 +119,21 @@ C:\Users\scully\Desktop\package_creator\package_creator.exe all -c256 "C:\Users\
 
 openssl pkcs12 -export -inkey C:\temp\server.pemkey -in C:\temp\cert-chain.txt -password pass:ABCD -out C:\temp\certificate(chain_and_key).pfx
 
-openssl pkcs12 -export -out signingchain.pfx -inkey signing.key -passin file:password.txt -in signingchain.pem -certfile signingroot.pem -password pass:kI3998KrkIqMzEU2Y0in@*1n7PG*a1^zFBHFB1CebLiG$L@UWs$8t0K*L@om
+openssl pkcs12 -export -out signingchain.pfx -inkey signing.key -passin file:password.txt -in signingchain.pem -certfile signingroot.pem -password pass:<password>
 
-openssl pkcs12 -export -out signingchainnewpasswd.pfx -inkey signingnewpwd.key -passin pass
-:kI3998KrkIqMzEU2Y0in@*1n7PG*a1^zFBHFB1CebLiG$L@UWs$8t0K*L@om -in signingchain.pem -certfile signingroot.pem -password p
-ass:kI3998KrkIqMzEU2Y0in@*1n7PG*a1^zFBHFB1CebLiG$L@UWs$8t0K*L@om
 
 c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.exe pkcs12 -export -out vne.pfx -inkey signingnewpwd.key -passin pass:Abcd1234* -in signingchain.pem -certfile signingroot.pem -password pass:Abcd1234*
 
-c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.exe pkcs12 -export -out build_cert256_final.pfx -inkey signingnewpwd.key -passin pass:sign@DcertNOsvn -in signingchain.pem -certfile signingroot.pem -password pass:sign@DcertNOsvn
+c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.exe pkcs12 -export -out build_cert256_final.pfx -inkey signingnewpwd.key -passin pass:<password>  -in signingchain.pem -certfile signingroot.pem -password pass:<password>
 
 
-c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.exe pkcs12 -info -in build_cert256_final.pfx  -passin pass:sign@DcertNOsvn
+c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.exe pkcs12 -info -in build_cert256_final.pfx  -passin pass:<password>
 
 
 
 openssl pkcs12 -info -in <build.pfx> -passin pass:<password>  for this output
 
-openssl pkcs12 -info -in signingchainnewpasswd.pfx  -passin pass:kI3998KrkIqMzEU2Y0in@*1n7PG*a1^zFBHFB1CebLiG$L@UWs$8t0K*L@om
+openssl pkcs12 -info -in signingchainnewpasswd.pfx  -passin pass:<password>
 
 all -c256 C:\TEMP\build_cert_issue\ExterroCodeSigning-2021-2024.pfx -p "kI3998KrkI!qMzEU2Y0in@*1n7PG*a1^zFBHFB1CebLiG$&L@U&Ws$8t0K*L!@om" -t C:\TEMP\build_cert_issue\digicert_sha384.cer -d E:\dev\agent\agent-all\trunk\target\bin\vs140\Release.x64 -e rim.exe C:\TEMP\build_cert_issue\rim.pkg
 
