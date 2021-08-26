@@ -1,0 +1,22 @@
+Generating Self-Signed certificate to be for SSL communication between Clients, SS and Agents.
+ 
+Download the openssl installation from following URL and unzip it in a directory. Its not an installer but self-contained archive to be used for openssl utilities.
+ 
+https://curl.se/windows/dl-7.74.0_2/openssl-1.1.1i_2-win32-mingw.zip
+ 
+Open cmd.exe and go to its directory. Set the env variable OPENSSL_CONF to this. Please check openssl.cnf should be present at current directory.
+ 
+set OPENSSL_CONF=openssl.cnf
+ 
+Generate the self-signed certificate using following command. The output will be two files – ss_ca.key (Private Key File) and ss_ca.crt (SS root certificate).
+ 
+openssl req -newkey rsa:2048 -nodes -keyout ss_ca.key -x509 -days 365 -out ss_ca.crt
+ 
+Generate the private key file (pem format) by using following command:
+ 
+copy /b ss_ca.crt + ss_ca.key ss_ca.pem
+ 
+As output of these commands will have following output files:
+Ss_ca.crt  - to be used as public certificate 
+Ss_ca.pem – private key file – to be used as private certificate 
+ 

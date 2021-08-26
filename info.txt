@@ -1,0 +1,153 @@
+=== Certs on Windows ===
+C:\Program Files\OpenSSL-Win64\bin>openssl.exe req -x509 -sha256 -newkey rsa:2048 -out ca.crt -keyout ca.key -days 3650
+
+C:\Program Files\OpenSSL-Win64\bin>openssl req -x509 -sha256 -newkey rsa:2048 -out ca.crt -keyout ca.key -days 3650
+
+C:\Program Files\OpenSSL-Win64\bin>set OPENSSL_CONF="c:\Program Files\OpenSSL-Win64\bin\vne\demoCA\openssl.cnf"
+
+C:\Program Files\OpenSSL-Win64\bin>echo %OPENSSL_CONF%
+"c:\Program Files\OpenSSL-Win64\bin\vne\demoCA\openssl.cnf"
+
+
+
+C:\Program Files\OpenSSL-Win64\bin>set OPENSSL_CONF=c:/Program Files/OpenSSL-Win64/bin/openssl.cfg   <== No double quotes here
+
+C:\Program Files\OpenSSL-Win64\bin>echo %OPENSSL_CONF%
+"c:/Program Files/OpenSSL-Win64/bin/openssl.cfg"
+
+..\..\openssl.exe req -x509 -sha256 -newkey rsa:2048 -out ca.crt -keyout ca.key -days 3650
+CSR request 
+..\..\openssl.exe req -new -nodes -out server_1.csr -keyout server_1.key
+
+..\..\openssl.exe ca -md sha256 -days 3650 -policy policy_match -keyfile ca.key -cert ca.crt -out server_1.crt -infiles server_1.csr
+
+Public Certificate (Siteserver Config)
+..\..\openssl.exe crl2pkcs7 -nocrl -outform DER -certfile server_1.crt -certfile ca.crt -out server_1.p7b
+
+Private Certificate (Siteserver Config)
+copy /b server_1.crt + server_1.key server_1.pem
+
+====
+Print a self-signed certificate:
+
+..\..\openssl.exe x509 -in server_1.crt -text -noout
+
+Print a signing request:
+
+openssl req -in example-com.req.pem -text -noout
+
+this works 
+
+..\..\openssl.exe x509 -req -days 730 -in server_1.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out server_1.crt
+
+///////////////////// FINAL STEPS - EASY WAY ///////////////////////////
+
+Reference:  https://blog.didierstevens.com/2021/06/07/how-to-make-your-own-cert-with-openssl-on-windows-reloaded/
+
+https://curl.se/windows/dl-7.74.0_2/openssl-1.1.1i_2-win32-mingw.zip
+
+set OPENSSL_CONF=openssl.cnf
+
+openssl req -x509 -sha256 -newkey rsa:2048 -out ca.crt -keyout ca.key -days 3650
+
+CSR request 
+openssl req -new -nodes -out server_1.csr -keyout server_1.key
+
+openssl x509 -sha256 -req -days 3650 -in server_1.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out server_1.crt
+
+Public Certificate (Siteserver Config)
+openssl crl2pkcs7 -nocrl -outform DER -certfile server_1.crt -certfile ca.crt -out server_1.p7b
+
+Private Certificate (Siteserver Config)
+copy /b server_1.crt + server_1.key server_1.pem
+
+/////
+Convert PKCS #7 (.p7b) to PEM using OpenSSL
+openssl pkcs7 -print_certs -in certificate.p7b -out certificate.cer
+
+====
+Print a certificate:
+
+openssl x509 -in server_1.crt -text -noout
+
+Print a signing request:
+
+openssl req -in example-com.req.pem -text -noout
+
+print a pfx cert file: 
+
+openssl pkcs12 -info -in build256_old.pfx
+
+////////////////////////////
+
+openssl req -x509 -sha256 -newkey rsa:2048 -out ss_ca.crt -keyout ss_ca.key -days 3650
+copy /b ss_ca.crt + ss_ca.key ss_ca.pem
+
+
+//Self Signed Cert for SS
+
+https://curl.se/windows/dl-7.74.0_2/openssl-1.1.1i_2-win32-mingw.zip
+
+set OPENSSL_CONF=openssl.cnf
+
+openssl req -newkey rsa:2048 -nodes -keyout domain.key -x509 -days 365 -out domain.crt
+copy /b domain.crt + domain.key domain.pem
+
+==========
+
+package_creator.exe sign -c256 <cert path> -p <password> -e <exe name>
+
+%PKGCREATOR% sign %IncludePrivate256% %PrivatePath256% %IncludePass256% %PrivatePass256% -e %1 || (set FAILED=1 && echo Failed to sign %1 && exit /b 1)
+
+
+
+package_creator.exe all -c256 <cert path> -p <password> -t <trusted cert> -d <exe path> -e <exe name> <output pkg name>
+
+all -c256 C:\TEMP\build_cert_issue\ExterroCodeSigning-2021-2024.pfx -p "kI3998KrkI!qMzEU2Y0in@*1n7PG*a1^zFBHFB1CebLiG$&L@U&Ws$8t0K*L!@om" -t C:\TEMP\build_cert_issue\adata.p7b -d C:\TEMP\build_cert_issue -e rim.exe C:\TEMP\build_cert_issue\rim.pkg
+
+all -c256 C:\TEMP\build_cert_issue\ExterroCodeSigning-2021-2024.pfx -p "kI3998KrkI!qMzEU2Y0in@*1n7PG*a1^zFBHFB1CebLiG$&L@U&Ws$8t0K*L!@om" -t C:\TEMP\build_cert_issue\adata.p7b -d E:\Release.x64 -e rim.exe C:\TEMP\build_cert_issue\rim.pkg
+
+all -c256 C:\TEMP\build_cert_issue\ExterroCodeSigning-2021-2024.pfx -p "kI3998KrkI!qMzEU2Y0in@*1n7PG*a1^zFBHFB1CebLiG$&L@U&Ws$8t0K*L!@om" -t C:\TEMP\build_cert_issue\digicert_sha384.cer -d E:\dev\agent\agent-all\trunk\target\bin\vs140\Release.x64 -e rim.exe C:\TEMP\build_cert_issue\rim.pkg
+
+digicert_sha384.cer 
+
+c:\temp\build_cert_issue\package_creator.exe
+
+C:\Users\scully\Desktop\package_creator\package_creator.exe all -c256 "C:\Users\scully\Desktop\code_sign_cert\Exterro Code Signing - 2021-2024.pfx" -p <Password> -t C:\Users\scully\source\mods_root_trunk\agentv2\adata.p7b -d C:\Users\scully\source\mods_root_trunk\agentv2\install\Release.Win32\modules\screen -e screen.exe C:\Users\scully\source\mods_root_trunk\agentv2\installRelease.Win32\modules\screen.pkg
+
+=========================================================================
+
+openssl pkcs12 -export -inkey C:\temp\server.pemkey -in C:\temp\cert-chain.txt -password pass:ABCD -out C:\temp\certificate(chain_and_key).pfx
+
+openssl pkcs12 -export -out signingchain.pfx -inkey signing.key -passin file:password.txt -in signingchain.pem -certfile signingroot.pem -password pass:kI3998KrkIqMzEU2Y0in@*1n7PG*a1^zFBHFB1CebLiG$L@UWs$8t0K*L@om
+
+openssl pkcs12 -export -out signingchainnewpasswd.pfx -inkey signingnewpwd.key -passin pass
+:kI3998KrkIqMzEU2Y0in@*1n7PG*a1^zFBHFB1CebLiG$L@UWs$8t0K*L@om -in signingchain.pem -certfile signingroot.pem -password p
+ass:kI3998KrkIqMzEU2Y0in@*1n7PG*a1^zFBHFB1CebLiG$L@UWs$8t0K*L@om
+
+c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.exe pkcs12 -export -out vne.pfx -inkey signingnewpwd.key -passin pass:Abcd1234* -in signingchain.pem -certfile signingroot.pem -password pass:Abcd1234*
+
+c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.exe pkcs12 -export -out build_cert256_final.pfx -inkey signingnewpwd.key -passin pass:sign@DcertNOsvn -in signingchain.pem -certfile signingroot.pem -password pass:sign@DcertNOsvn
+
+
+c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.exe pkcs12 -info -in build_cert256_final.pfx  -passin pass:sign@DcertNOsvn
+
+
+
+openssl pkcs12 -info -in <build.pfx> -passin pass:<password>  for this output
+
+openssl pkcs12 -info -in signingchainnewpasswd.pfx  -passin pass:kI3998KrkIqMzEU2Y0in@*1n7PG*a1^zFBHFB1CebLiG$L@UWs$8t0K*L@om
+
+all -c256 C:\TEMP\build_cert_issue\ExterroCodeSigning-2021-2024.pfx -p "kI3998KrkI!qMzEU2Y0in@*1n7PG*a1^zFBHFB1CebLiG$&L@U&Ws$8t0K*L!@om" -t C:\TEMP\build_cert_issue\digicert_sha384.cer -d E:\dev\agent\agent-all\trunk\target\bin\vs140\Release.x64 -e rim.exe C:\TEMP\build_cert_issue\rim.pkg
+
+
+
+all -c256 C:\TEMP\build_cert_issue\test1.pfx -p "Abcd1234*" -t C:\TEMP\build_cert_issue\ss_ca.crt -d E:\temp -e <executable> C:\TEMP\<pkg name>
+
+
+.pem -> MS Cert Manager -> pfx file -> key file -> pem file (with cer contents) 
+c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.exe pkcs12 -in key.pfx -out key.pem -nodes
+
+.p7b file -> p7b file -> b64_der file -> combine them to single p7b file using openssl command 
+c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.exe crl2pkcs7 -nocrl -outform DER -certfile root_b64.cer -certfile inter_b64.cer -certfile leaf_b64.cer -out vne.p7b
+
