@@ -1,0 +1,18 @@
+-- Steps to generate certificate signed by self-signed CA --
+ 
+set OPENSSL_CONF=c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.cnf
+ 
+1. Create a self signed CA Cert and remember the password setup for its private key
+c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.exe req -x509 -sha256 -newkey rsa:2048 -out ca.crt -keyout ca.key -days 3650
+ 
+2. Generate a new CSR for a new certificate
+c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.exe req -new -nodes -out cert1.csr -keyout cert1.key
+ 
+3. Generate the new CA signed cert from the csr request.
+c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.exe x509 -sha256 -req -days 3650 -in cert1.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out cert1.crt
+ 
+4. Create they private cert from generated certificate and key.
+copy /b cert1.crt + cert1.key cert1.pem
+ 
+5. Create the p7b public cert with complete CA Chain and generated public cert above
+c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.exe crl2pkcs7 -nocrl -outform DER -certfile ca.crt -certfile cert1.crt -out cert1.p7b
