@@ -1,0 +1,16 @@
+https://web.mit.edu/freebsd/head/contrib/wpa/src/crypto/tls_openssl.c
+
+https://aticleworld.com/ssl-server-client-using-openssl-in-c/
+
+<openssl_src>/demo/easy-tls 
+
+http://www.zedwood.com/article/cpp-check-crl-for-revocation
+
+https://www.golinuxcloud.com/openssl-create-certificate-chain-linux/#Step_4_Configure_opensslcnf_for_Root_CA_Certificate
+
+https://blog.didierstevens.com/2013/05/08/howto-make-your-own-cert-and-revocation-list-with-openssl/
+
+
+
+
+
