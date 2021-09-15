@@ -182,4 +182,51 @@ int verify_callback(int preverify, X509_STORE_CTX* x509_ctx)
     return preverify;
 }
 
+########### COMMON COMMANDS ##################
+Ref: https://geekflare.com/openssl-commands-certificates/
+
+1. Verify CSR File
+openssl req -noout -text -in <csrfile>
+
+2. Remove Password from key
+openssl rsa -in certkey.key -out nopassphrase.key
+
+3. Verify Private Key
+openssl rsa -in certkey.key –check
+
+4. Verify Certificate File
+openssl x509 -in certfile.pem -text –noout
+
+5. Verify issuer CA
+openssl x509 -in certfile.pem -noout -issuer -issuer_hash
+
+6. Check Hash Value of a Certificate
+ openssl x509 -noout -hash -in bestflare.pem
+ 
+7. Convert DER to PEM
+openssl x509 –inform der –in sslcert.der –out sslcert.pem
+
+8. Convert PEM to DER
+openssl x509 –outform der –in sslcert.pem –out sslcert.der
+
+9. Convert priv key and certificate to PKCS12 format 
+openssl pkcs12 –export –out sslcert.pfx –inkey key.pem –in sslcert.pem
+
+10. Create a new CSR using existing private key
+openssl req –out certificate.csr –key existing.key –new
+
+11. Check contents of PKCS12 format cert
+openssl pkcs12 –info –nodes –in cert.p12
+
+12. Convert PKCS12 to PEM Format
+openssl pkcs12 –in cert.p12 –out cert.pem
+
+13. Verify if a particular cipher is accepted by a web URL
+openssl s_client -cipher 'ECDHE-ECDSA-AES256-SHA' -connect secureurl:443
+
+
+
+
+
+
 
