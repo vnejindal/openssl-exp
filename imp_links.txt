@@ -10,7 +10,7 @@ https://www.golinuxcloud.com/openssl-create-certificate-chain-linux/#Step_4_Conf
 
 https://blog.didierstevens.com/2013/05/08/howto-make-your-own-cert-and-revocation-list-with-openssl/
 
-
+https://zakird.com/2013/10/13/certificate-parsing-with-openssl
 
 
 

@@ -1,0 +1,27 @@
+==== CRL Stuff ====
+List: 
+1. Certs signed by any other CAs
+2. Self-Signed certs 
+3. Intermedite CA test
+4. Revoke a cert in CRL file and exclude it back again 
+5. Verify the Leaf or all certs from CRL file - ssl flags settings 
+6. Use of index file by CA while generating certificates 
+7. The certs where CRL is present as URLs 
+
+openssl ca -config ca.conf -gencrl -keyfile ca.key -cert ca.crt -out root.crl.pem
+openssl crl -inform PEM -in root.crl.pem -outform DER -out root.crl
+
+//Check the CRL file contents 
+c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.exe crl -in ca.crl.pem -noout -text
+
+//verifies that the certificate is valid
+c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.exe verify -CAfile ca.crt cert1.crt
+
+//create empty CRL File 
+c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.exe ca -config ca.conf -gencrl -keyfile ca.key -cert ca.crt -out ca.crl.pem
+
+//revoke a certificate
+c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.exe ca -config ca.conf  -revoke cer1.crt
+
+X509_STORE_set_flags(ctx->ca_store, X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
+
