@@ -54,12 +54,147 @@ SSL_CTX_obj & ctx
 SSL_CTX_set_ex_data(ctx, 0, (void *)tls_validator);
 
 
-## Good Links: 
-http://www.zedwood.com/article/cpp-check-crl-for-revocation
-https://www.feistyduck.com/library/openssl-cookbook/online/ch-openssl.html
-https://zakird.com/2013/10/13/certificate-parsing-with-openssl
-https://quuxplusone.github.io/blog/2020/01/27/openssl-part-4/
+
+bool TlsConnectionValidator(X509_STORE_CTX  *x509_ctx)
+{
+	bool rv = true; 
 
 
+	const char *crl_file = g_tlsCrlConfig.crl_file.c_str();
+	std::string downloader = g_tlsCrlConfig.crl_downloader;
+	X509* cert = X509_STORE_CTX_get_current_cert(x509_ctx);
+	int depth = X509_STORE_CTX_get_error_depth(x509_ctx);
+
+#if 0 // for debugging
+	X509_NAME* iname = cert ? X509_get_issuer_name(cert) : NULL;
+	X509_NAME* sname = cert ? X509_get_subject_name(cert) : NULL;
+
+	print_cn_name("Issuer (cn)", iname);
+	print_cn_name("Subject (cn)", sname);
+	LOG_INFO << "vne:: crl_file: " << crl_file << LOGGER::endl;
+	LOG_INFO << "vne:: downloader: " << downloader << LOGGER::endl;
+
+#endif
+	
+
+	//check if crl file exists
+	struct stat buffer;
+	if (stat(crl_file, &buffer) == 0) 
+	{
+		X509_CRL *crl;
+		STACK_OF(X509_CRL) *crls;
+		FILE *fp;
+		errno_t error_code;
+
+		error_code = fopen_s(&fp, crl_file, "r");
+		if (error_code != 0) {
+			return false; 
+		}
+
+		if (!(crl = PEM_read_X509_CRL(fp, NULL, NULL, NULL))) {
+			fclose(fp);
+			return false;
+		}
+		fclose(fp);
+
+		// Create a CRL_Stack 
+		if (!(crls = sk_X509_CRL_new_null())) {
+			return false;
+		}
+		// Add CRL to CRL_Stack
+		if (sk_X509_CRL_push(crls, crl) != 1) {
+			return false;
+		}
+
+		X509_STORE_CTX *verify_ctx = NULL;
+		if (!(verify_ctx = X509_STORE_CTX_new())) {
+			return false;
+		}
+
+		if (X509_STORE_CTX_init(verify_ctx, x509_ctx->ctx, cert, NULL) != 1) {
+			return false;
+		}
+		X509_STORE_CTX_set_flags(verify_ctx, X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
+		X509_STORE_CTX_set0_crls(verify_ctx, crls);
+
+		int ret = X509_verify_cert(verify_ctx);
+		if (ret == 1)
+		{
+			rv = true;
+		}
+		else
+		{
+			rv = false;
+		}
+	}
+	else 
+	{
+
+		//get CDP URLs from server peer certficate
+		std::vector<std::string> crl_urls = tls_get_cdp_urls(cert);
+		size_t i = 0, ix = 0;
+
+		if (crl_urls.empty())
+		{
+			return false;
+		}
+
+		//Pick the first URL of type HTTP
+		for (i = 0, ix = crl_urls.size(); i<ix; i++)
+		{
+			if (strstr(crl_urls[i].c_str(), "http"))
+			{
+
+				std::string args = crl_urls[i] + " \"" + std::string(crl_file) + "\"";
+				ShellExecuteA(NULL, "open", downloader.c_str(), args.c_str(), "", SW_HIDE);
+				std::time(&g_tlsCrlConfig.crl_ts);
+				break;
+			}
+		}
+		//no http url found
+		if (i == ix)
+		{
+			return false;
+		}
+
+	}
+#endif
+	return rv;
+}
+
+
+//Extracts CDP URLs in a X509 certficate
+//Reference: http://www.zedwood.com/article/cpp-check-crl-for-revocation
+static std::vector<std::string> tls_get_cdp_urls(X509 *x509)
+{
+	std::vector<std::string> list;
+	int nid = NID_crl_distribution_points;
+	STACK_OF(DIST_POINT) * dist_points = (STACK_OF(DIST_POINT) *)X509_get_ext_d2i(x509, nid, NULL, NULL);
+	for (int j = 0; j < sk_DIST_POINT_num(dist_points); j++)
+	{
+		DIST_POINT *dp = sk_DIST_POINT_value(dist_points, j);
+		DIST_POINT_NAME    *distpoint = dp->distpoint;
+		if (distpoint->type == 0)//fullname GENERALIZEDNAME
+		{
+			for (int k = 0; k < sk_GENERAL_NAME_num(distpoint->name.fullname); k++)
+			{
+				GENERAL_NAME *gen = sk_GENERAL_NAME_value(distpoint->name.fullname, k);
+				ASN1_IA5STRING *asn1_str = gen->d.uniformResourceIdentifier;
+				list.push_back(std::string((char*)ASN1_STRING_data(asn1_str), ASN1_STRING_length(asn1_str)));
+			}
+		}
+		else if (distpoint->type == 1)//relativename X509NAME
+		{
+			STACK_OF(X509_NAME_ENTRY) *sk_relname = distpoint->name.relativename;
+			for (int k = 0; k < sk_X509_NAME_ENTRY_num(sk_relname); k++)
+			{
+				X509_NAME_ENTRY *e = sk_X509_NAME_ENTRY_value(sk_relname, k);
+				ASN1_STRING *d = X509_NAME_ENTRY_get_data(e);
+				list.push_back(std::string((char*)ASN1_STRING_data(d), ASN1_STRING_length(d)));
+			}
+		}
+	}
+	return list;
+}
 
 
