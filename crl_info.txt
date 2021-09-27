@@ -25,3 +25,41 @@ c:\TEMP\openssl-1.1.1i_2-win32-mingw\openssl.exe ca -config ca.conf  -revoke cer
 
 X509_STORE_set_flags(ctx->ca_store, X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
 
+
+############################################
+
+easy_tls_crl_1.c - passing userdata in x509 ctx and accessing it inside validation callback function 
+
+#### Passing App function pointer in x509 ctx to be called during handshake 
+
+bool(*tls_validator)(void *) = (bool (*)(void *))&TlsConnectionValidator;
+
+bool TlsConnectionValidator(X509_STORE_CTX  *x509_ctx)
+{
+
+}
+
+- SSL handshake callback function : 
+X509_STORE_CTX* x509_ctx;
+SSL* ssl = (SSL *)X509_STORE_CTX_get_app_data(x509_ctx);
+SSL_CTX* ssl_ctx = ssl_ctx = SSL_get_SSL_CTX(ssl);
+void* p = SSL_CTX_get_ex_data(ssl_ctx, 0);
+
+bool (*appcb)(void *) = (bool (*)(void *))p;
+if (appcb)
+   preverify = (*appcb)((void*)x509_ctx) ? 1 : 0;
+
+- Set the UserData in TLS context
+SSL_CTX_obj & ctx
+SSL_CTX_set_ex_data(ctx, 0, (void *)tls_validator);
+
+
+## Good Links: 
+http://www.zedwood.com/article/cpp-check-crl-for-revocation
+https://www.feistyduck.com/library/openssl-cookbook/online/ch-openssl.html
+https://zakird.com/2013/10/13/certificate-parsing-with-openssl
+https://quuxplusone.github.io/blog/2020/01/27/openssl-part-4/
+
+
+
+

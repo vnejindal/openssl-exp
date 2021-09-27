@@ -13,4 +13,9 @@ https://blog.didierstevens.com/2013/05/08/howto-make-your-own-cert-and-revocatio
 https://zakird.com/2013/10/13/certificate-parsing-with-openssl
 
 
+## Good Links: 
+http://www.zedwood.com/article/cpp-check-crl-for-revocation
+https://www.feistyduck.com/library/openssl-cookbook/online/ch-openssl.html
+https://zakird.com/2013/10/13/certificate-parsing-with-openssl
+https://quuxplusone.github.io/blog/2020/01/27/openssl-part-4/
 
