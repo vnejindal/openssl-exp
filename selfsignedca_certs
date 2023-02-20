@@ -1,0 +1,38 @@
+
+### Self signed CA and generate server and client certs on Linux 
+
+== OpenSSL commands for Generating Self CA and various certs ==
+ 
+https://blog.devolutions.net/2020/07/tutorial-how-to-generate-secure-self-signed-server-and-client-certificates-with-openssl/
+ 
+openssl ecparam -name prime256v1 -genkey -noout -out ca.key
+openssl req -new -x509 -sha256 -key ca.key -out ca.crt
+ 
+ 
+Server Certificate
+ 
+openssl ecparam -name prime256v1 -genkey -noout -out server.key
+openssl req -new -sha256 -key server.key -out server.csropenssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out server.crt -days 1000 -sha256
+ 
+Client Certificate 
+ 
+openssl ecparam -name prime256v1 -genkey -noout -out client1.key
+openssl req -new -sha256 -key client1.key -out client1.csr
+openssl x509 -req -in client1.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out client1.crt -days 1000 -sha256
+ 
+ 
+ 
+ 
+ 
+ 
+Mosquitto Commands: 
+ 
+mosquitto_pub -d --cafile ca.crt --cert client1.crt --key client1.key -p 8883 -h <mqttserver> -t abc/1 -m 'uhoo' --insecure
+mosquitto_sub --cafile ca.crt  --cert client1.crt --key client1.key -v -p 8883 -h <mqttserver> -t abc/1 --insecure
+ 
+mosquitto_pub -d -h 13.233.17.91 -p 1883 -t /vne -m hi
+mosquitto_sub -d -h 13.233.17.91 -p 1883 -t /vne
+ 
+mosquitto_pub -d --cafile ca.crt --cert client1.crt --key client1.key -p 8883 -h <mqttserver> -t abc/1 -m 'uhoo' --insecure -u testuser1 -P testuser1
+mosquitto_sub --cafile ca.crt  --cert client1.crt --key client1.key -v -p 8883 -h <mqttserver> -t abc/1 --insecure -u testuser1 -P testuser1
+ 
